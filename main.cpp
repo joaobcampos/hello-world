@@ -14,6 +14,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Cscreen.h"
+#include "Cobject.h"
+#include "shader.h"
 using namespace glm;
 
 
@@ -31,8 +33,9 @@ int main(){
 	if (window == NULL){
 		std::cout << "Something wrong happened." << std::endl;
 	}
+	GLuint programID = LoadShaders( "TransformVertexShader.vertexshader", "ColorFragmentShader.fragmentshader" );
 	
-	static const GLfloat g_vertex_buffer_data[] = { 
+	GLfloat g_vertex_buffer_data[] = { 
 		-1.0f,-1.0f,-1.0f,
 		-1.0f,-1.0f, 1.0f,
 		-1.0f, 1.0f, 1.0f,
@@ -72,7 +75,7 @@ int main(){
 	};
 
 	// One color for each vertex. They were generated randomly.
-	static const GLfloat g_color_buffer_data[] = { 
+	GLfloat g_color_buffer_data[] = { 
 		0.583f,  0.771f,  0.014f,
 		0.609f,  0.115f,  0.436f,
 		0.327f,  0.483f,  0.844f,
@@ -111,10 +114,12 @@ int main(){
 		0.982f,  0.099f,  0.879f
 	};
 	
-	Cobject cube;
-	cube.set_projection(glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f));
-	cube.set_view(glm::lookAt(glm::vec3(5,0,0), glm::vec3(0,0,0), glm::vec3(0,0,-1)));
-	cube.set_model(glm::mat4(1.0f));
+	
+	Cobject cube(glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f) , glm::lookAt(glm::vec3(5,0,0), glm::vec3(0,0,0), glm::vec3(0,0,-1) ), glm::mat4(1.0f),
+			0, 0,
+			g_vertex_buffer_data, 36,
+			g_color_buffer_data, 36
+			);
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
 	glm::mat4 MVP   = cube.get_mvp();
 	
@@ -122,35 +127,16 @@ int main(){
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glUseProgram(programID);
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-		// 1rst attribute buffer : vertices
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-		glVertexAttribPointer(
-			0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
-			3,                  // size
-			GL_FLOAT,           // type
-			GL_FALSE,           // normalized?
-			0,                  // stride
-			(void*)0            // array buffer offset
-		);
-
-		// 2nd attribute buffer : colors
-		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-		glVertexAttribPointer(
-			1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
-			3,                                // size
-			GL_FLOAT,                         // type
-			GL_FALSE,                         // normalized?
-			0,                                // stride
-			(void*)0                          // array buffer offset
-		);
+		
+		cube.enable_vertex_buffer();
+		cube.enable_color_buffer();
+		
+		cube.draw(12);
 
 		// Draw the triangle !
-		glDrawArrays(GL_TRIANGLES, 0, 12*3); // 12*3 indices starting at 0 -> 12 triangles
-
-		glDisableVertexAttribArray(0);
-		glDisableVertexAttribArray(1);
+		
+		cube.disable_vertex_buffer();
+		cube.disable_color_buffer();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		} // Check if the ESC key was pressed or the window was closed

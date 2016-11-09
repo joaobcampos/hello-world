@@ -1,19 +1,41 @@
 #include "Cobject.h"
 
-Cobject::Cobject(GLuint programID, std::string shaders) : binder(programID), shaders(shaders){};
-Cobject::~Cobject(){};
+
+
+void Cobject::set_projection(const glm::mat4 &proj){
+	Projection = proj;
+}
 	
+void Cobject::set_view(const glm::mat4 &vw_){
+	View = vw;
+}
+	
+void Cobject::set_model(const glm::mat4 &mdl){
+	Model = &mdl;
+}	
 		
-	private:
-		glm::mat4 Projection; //_triangle = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f);
-		// Camera matrix
-		glm::mat4 View; //_triangle       = glm::lookAt(
-								glm::vec3(5,0,0), // Camera is at (4,3,-3), in World Space
-								glm::vec3(0,0,0), // and looks at the origin
-								glm::vec3(0,0,-1)  // Head is up (set to 0,-1,0 to look upside-down)
-						   );
-		// Model matrix : an identity matrix (model will be at the origin)
-		glm::mat4 Model;//      = glm::mat4(1.0f);//  + glm::mat4(glm::vec4(0.0f, 0.0f, 1.0f, 0.0f); glm::vec4(1.0f, 0.0f, 1.0f, 0.0f); glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
-		GLfloat * g_vertex_buffer;
-	 	GLfloat * g_color_buffer
+void Cobject::bind_buffer(GLuint &buf, GLfloat * data_buffer){
+	glGenBuffers(1, &buf);
+	glBindBuffer(GL_ARRAY_BUFFER, buf);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(data_buffer), data_buffer, GL_STATIC_DRAW);
+}
+
+void Cobject::bind_vertex_buffer(GLfloat * data_buffer){
+	bind_buffer(&vertexbuffer, GLfloat data_buffer);
+}
+		
+void Cobject::bind_color_buffer(GLfloat * data_buffer){
+	bind_buffer(&colorxbuffer, GLfloat data_buffer);
+}
+
+glm::mat4 Cobject::get_mvp(){
+	return Projection * View_triangle * Model_triangle;
+}
+
+GLuint Cobject::get_vertexbuffer(){
+	return vertexbuffer;
+}
+
+GLuint Cobject::get_colorbuffer(){
+	return colorbuffer;
 }

@@ -73,7 +73,7 @@ int main(){
 		-1.0f, 1.0f, 1.0f,
 		 1.0f,-1.0f, 1.0f
 	};
-
+	std::cout << "Debugging point 1." << std::endl;
 	// One color for each vertex. They were generated randomly.
 	GLfloat g_color_buffer_data[] = { 
 		0.583f,  0.771f,  0.014f,
@@ -113,32 +113,33 @@ int main(){
 		0.820f,  0.883f,  0.371f,
 		0.982f,  0.099f,  0.879f
 	};
-	
-	
-	Cobject cube(glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f) , glm::lookAt(glm::vec3(5,0,0), glm::vec3(0,0,0), glm::vec3(0,0,-1) ), glm::mat4(1.0f),
-			0, 0,
-			g_vertex_buffer_data, 36,
-			g_color_buffer_data, 36
-			);
+	std::cout << "Debugging point 2." << std::endl;
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
-	glm::mat4 MVP   = cube.get_mvp();
+	Cobject cube(glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f) , glm::lookAt(glm::vec3(5,0,0), glm::vec3(0,0,0), glm::vec3(0,0,-1) ), glm::mat4(1.0f),
+			g_vertex_buffer_data, g_color_buffer_data); 			
 	
+	std::cout << "Debugging point 3." << std::endl;
+	glm::mat4 MVP   = cube.get_mvp();
+	std::cout << "Debugging point 7." << std::endl;
 	do{
+		std::cout << "Debugging point 8." << std::endl;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		std::cout << "Debugging point 9." << std::endl;
 		glUseProgram(programID);
+		std::cout << "Debugging point 10." << std::endl;
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-		
-		cube.enable_vertex_buffer();
-		cube.enable_color_buffer();
-		
+		std::cout << "Debugging point 11." << std::endl;
+		cube.enable_buffers();
+		std::cout << "Debugging point 13." << std::endl;
 		cube.draw(12);
-
+		std::cout << "Debugging point 14." << std::endl;
 		// Draw the triangle !
-		
-		cube.disable_vertex_buffer();
-		cube.disable_color_buffer();
+		cube.disable_buffers();
+		std::cout << "Debugging point 16." << std::endl;
 		glfwSwapBuffers(window);
+		std::cout << "Debugging point 17." << std::endl;
 		glfwPollEvents();
+		std::cout << "Debugging point 18." << std::endl;
 		} // Check if the ESC key was pressed or the window was closed
 	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
 		   glfwWindowShouldClose(window) == 0 );

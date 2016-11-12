@@ -1,4 +1,4 @@
-#ifndef COBJECT_H
+##ifndef COBJECT_H
 #define COBJECT_H
 
 
@@ -9,7 +9,8 @@ class Cobject{
 	public:
 		Cobject(glm::mat4 proj, glm::mat4 vw, glm::mat4 mdl,
 				GLfloat g_v_buffer_data[], 
-				GLfloat g_c_buffer_data[] 
+				GLfloat g_c_buffer_data[],
+				int buf_size 
 			   );
 		~Cobject();
 	
@@ -18,8 +19,10 @@ class Cobject{
 		void set_view(const glm::mat4 &vw);
 	
 		void set_model(const glm::mat4 &mdl);
+	
+		GLuint * get_buffer();
 		
-		
+		void bind_new_vertex_buffer(GLfloat g_new_v_buffer[], int buf_size);
 		
 		glm::mat4 get_mvp();
 		void enable_buffers();
@@ -34,7 +37,7 @@ class Cobject{
 		glm::mat4 Model;
 		// Intrinsic information of the object (position and color)
 		GLuint * buffer;
-		
+		GLuint * VertexArrayID;
 		void bind_buffer(GLuint &buf, GLfloat data_buffer[], int size);
 };
 

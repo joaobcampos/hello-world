@@ -1,8 +1,8 @@
 // Include standard headers
+#include <iostream>
+#include <random>
 #include <stdio.h>
 #include <stdlib.h>
-#include <iostream>
-
 // Include GLEW
 #include <GL/glew.h>
 
@@ -18,6 +18,22 @@
 #include "shader.h"
 using namespace glm;
 
+void scale_vertex(GLfloat * g_vertex_buffer_data, int size, double scale){
+	for(int h = 0; h < size; ++h){
+		g_vertex_buffer_data[h] = scale * g_vertex_buffer_data[h];
+	}
+}
+
+void shake_randomly_plane_xy(GLfloat * g_vertex_buffer_data, int size, double var_x, double var_y){
+	for(int h = 0; h < size; h = h + 3){
+		if (g_vertex_buffer_data[h] + var_x < 2){
+			g_vertex_buffer_data[h] = g_vertex_buffer_data[h] + var_x;
+		}
+		if (g_vertex_buffer_data[h + 1] + var_y < 2){
+			g_vertex_buffer_data[h + 1] = g_vertex_buffer_data[h + 1] + var_y;
+		}
+	}
+}
 
 int main(){
 	GLFWwindow * window = NULL;
@@ -115,31 +131,53 @@ int main(){
 	};
 	std::cout << "Debugging point 2." << std::endl;
 	GLuint MatrixID = glGetUniformLocation(programID, "MVP");
-	Cobject cube(glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.0f) , glm::lookAt(glm::vec3(5,0,0), glm::vec3(0,0,0), glm::vec3(0,0,-1) ), glm::mat4(1.0f),
-			g_vertex_buffer_data, g_color_buffer_data); 			
+	Cobject cube(glm::perspective(90.0f, 4.0f / 3.0f, 0.1f, 100.0f) , glm::lookAt(glm::vec3(5,0,0), glm::vec3(0,0,0), glm::vec3(0,0,-1) ), glm::mat4(1.0f),
+			g_vertex_buffer_data, g_color_buffer_data, 108); 			
 	
 	std::cout << "Debugging point 3." << std::endl;
 	glm::mat4 MVP   = cube.get_mvp();
+	
+	std::cout << "***************************************" << std::endl;
+	std::cout << "Perspective matrix" << std::endl;
+	for(int g = 0; g < 4; ++g){
+		for(int h = 0; h < 4; ++h){
+			std::cout << MVP[g][h] << " ";
+		}
+		std::cout << std::endl;
+	}
+	std::cout << "***************************************" << std::endl;
 	std::cout << "Debugging point 7." << std::endl;
+	std::random_device rd;
+  	std::mt19937 rng(rd());
+  	std::uniform_int_distribution<int> uni(-100,100);
+	scale_vertex(g_vertex_buffer_data, 108, 0.5);
+	cube.bind_new_vertex_buffer(g_vertex_buffer_data, 108);
 	do{
-		std::cout << "Debugging point 8." << std::endl;
+		double var_x = uni(rng)/100;
+		double var_y = uni(rng)/100;
+		shake_randomly_plane_xy(g_vertex_buffer_data, 108, var_x, var_y);
+		
+		cube.bind_new_vertex_buffer(g_vertex_buffer_data, 108);
+		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		std::cout << "Debugging point 9." << std::endl;
 		glUseProgram(programID);
-		std::cout << "Debugging point 10." << std::endl;
 		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-		std::cout << "Debugging point 11." << std::endl;
+		
+		for(int h = 0; h < 108; ++h){
+			std::cout << g_vertex_buffer_data[h] << " ";
+			if ( (h + 1) % 3 == 0){
+				std::cout << std::endl;
+			}
+		}
+		
+		
+		
 		cube.enable_buffers();
-		std::cout << "Debugging point 13." << std::endl;
+		GLuint * buf = cube.get_buffer();
 		cube.draw(12);
-		std::cout << "Debugging point 14." << std::endl;
-		// Draw the triangle !
 		cube.disable_buffers();
-		std::cout << "Debugging point 16." << std::endl;
 		glfwSwapBuffers(window);
-		std::cout << "Debugging point 17." << std::endl;
 		glfwPollEvents();
-		std::cout << "Debugging point 18." << std::endl;
 		} // Check if the ESC key was pressed or the window was closed
 	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
 		   glfwWindowShouldClose(window) == 0 );
